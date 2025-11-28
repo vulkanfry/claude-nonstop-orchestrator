@@ -1,0 +1,41 @@
+{
+  "id": "S1",
+  "title": "",
+  "description": "",
+  "status": "pending",
+  "points": 3,
+  "dependencies": [],
+  "parallelizable": true,
+  "assigned_agent": null,
+  "started_at": null,
+  "completed_at": null,
+
+  "tasks": [
+    {
+      "id": "S1.T1",
+      "title": "",
+      "description": "",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+
+      "subtasks": [
+        {
+          "id": "S1.T1.1",
+          "description": "",
+          "status": "pending",
+          "files_to_modify": [],
+          "files_modified": [],
+          "completed_at": null
+        }
+      ]
+    }
+  ],
+
+  "acceptance_criteria": [],
+  "verification_results": {
+    "tests_pass": null,
+    "lint_pass": null,
+    "criteria_met": []
+  }
+}

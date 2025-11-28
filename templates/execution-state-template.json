@@ -1,0 +1,99 @@
+{
+  "$schema": "./execution-state-schema.json",
+  "version": "2.1",
+  "session_id": "",
+  "created_at": "",
+  "updated_at": "",
+
+  "task": {
+    "original_request": "",
+    "interpreted_goal": "",
+    "domain": "",
+    "complexity": "medium",
+    "keywords": []
+  },
+
+  "preparation": {
+    "status": "pending",
+    "skill_created": null,
+    "domain_skills_invoked": [],
+    "mcps": {
+      "local": [],
+      "discovered": [],
+      "recommended": []
+    }
+  },
+
+  "plan": {
+    "status": "pending",
+    "thinking_iterations": 0,
+    "stories": []
+  },
+
+  "execution": {
+    "status": "pending",
+    "current_story_id": null,
+    "current_task_id": null,
+    "current_subtask_id": null,
+    "agents_active": [],
+    "files_modified": [],
+    "errors_encountered": [],
+    "loops_completed": 0
+  },
+
+  "verification": {
+    "status": "pending",
+    "tests": { "status": null, "errors": [] },
+    "lint": { "status": null, "errors": [] },
+    "typecheck": { "status": null, "errors": [] },
+    "review": { "status": null, "issues": [] },
+    "last_check_time": null
+  },
+
+  "recovery": {
+    "compact_count": 0,
+    "last_compact_time": null,
+    "recovery_point": null
+  },
+
+  "checkpoints": {
+    "auto_checkpoint": true,
+    "checkpoint_list": [],
+    "last_checkpoint": null
+  },
+
+  "agent_pool": {
+    "agents": [],
+    "total_launched": 0,
+    "successful": 0,
+    "failed": 0,
+    "cached_results": {}
+  },
+
+  "metrics": {
+    "session_start": null,
+    "session_end": null,
+    "timing": {
+      "planning": null,
+      "execution": null,
+      "verification": null
+    },
+    "file_changes": {
+      "created": [],
+      "modified": [],
+      "deleted": []
+    },
+    "events": [],
+    "stories_completed": 0,
+    "stories_failed": 0,
+    "verification_loops": 0,
+    "gate_checks_passed": 0,
+    "gate_checks_failed": 0
+  },
+
+  "quality_gates": {
+    "pre_execute": { "status": null, "passed_at": null },
+    "post_execute": { "status": null, "passed_at": null },
+    "pre_complete": { "status": null, "passed_at": null }
+  }
+}

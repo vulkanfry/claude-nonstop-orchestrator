@@ -1,0 +1,191 @@
+{
+  "$schema": "./schema.json",
+  "version": "2.1.0",
+  "name": "nonstop",
+
+  "project": {
+    "root": "${PROJECT_ROOT}",
+    "source_dirs": ["src", "app", "lib"],
+    "file_extensions": [".ts", ".tsx", ".js", ".jsx", ".py", ".rs", ".go"]
+  },
+
+  "quality_rules": {
+    "hardcoded_strings": {
+      "enabled": true,
+      "pattern": "\"[A-Z][a-z]",
+      "exclude_patterns": ["import", "from", "type", "interface", "//", "console.log"],
+      "message": "Hardcoded string detected - use i18n"
+    },
+    "hardcoded_colors": {
+      "enabled": true,
+      "pattern": "#[0-9A-Fa-f]{6}",
+      "exclude_patterns": ["theme", "colors", ".md", "//"],
+      "message": "Hardcoded color detected - use theme tokens"
+    },
+    "type_any": {
+      "enabled": true,
+      "pattern": ": any",
+      "exclude_patterns": [],
+      "message": "Type 'any' detected - use explicit types"
+    },
+    "inline_styles": {
+      "enabled": true,
+      "pattern": "style={{",
+      "exclude_patterns": [],
+      "message": "Inline style detected - use StyleSheet",
+      "severity": "warning"
+    },
+    "todo_fixme": {
+      "enabled": true,
+      "pattern": "TODO|FIXME|HACK|XXX",
+      "exclude_patterns": [],
+      "message": "TODO/FIXME found",
+      "severity": "info"
+    },
+    "console_log": {
+      "enabled": false,
+      "pattern": "console\\.log",
+      "exclude_patterns": ["// debug"],
+      "message": "console.log left in code"
+    }
+  },
+
+  "quality_gates": {
+    "enabled": true,
+    "fail_fast": true,
+    "gates": {
+      "pre_execute": {
+        "enabled": true,
+        "checks": ["files_exist"],
+        "description": "Checks before starting execution"
+      },
+      "post_execute": {
+        "enabled": true,
+        "checks": ["lint_clean"],
+        "description": "Checks after each story completes"
+      },
+      "pre_complete": {
+        "enabled": true,
+        "checks": ["no_type_errors", "tests_pass", "build_success"],
+        "description": "Final checks before marking task complete"
+      }
+    },
+    "custom_gates": {}
+  },
+
+  "checkpoints": {
+    "auto_checkpoint": true,
+    "checkpoint_on_story_complete": true,
+    "max_checkpoints": 20,
+    "checkpoint_before_verification": true
+  },
+
+  "agent_pool": {
+    "enabled": true,
+    "max_parallel_agents": 5,
+    "cache_results": true,
+    "optimize_batching": true,
+    "cleanup_after_session": true
+  },
+
+  "metrics": {
+    "enabled": true,
+    "track_timing": true,
+    "track_file_changes": true,
+    "track_events": true,
+    "save_to_history": true,
+    "generate_report": true
+  },
+
+  "domain_skills": {
+    "enabled": true,
+    "auto_detect": true,
+    "auto_invoke": false,
+    "available": [
+      "typescript-expert",
+      "react-expert",
+      "react-native-expert",
+      "python-expert",
+      "rust-expert",
+      "api-backend-expert",
+      "devops-expert",
+      "ui-ux-expert"
+    ],
+    "skill_mapping": {
+      "typescript": ["typescript-expert"],
+      "react": ["react-expert", "ui-ux-expert"],
+      "react-native": ["react-native-expert", "ui-ux-expert"],
+      "python": ["python-expert"],
+      "rust": ["rust-expert"],
+      "backend": ["api-backend-expert"],
+      "api": ["api-backend-expert"],
+      "devops": ["devops-expert"],
+      "frontend": ["ui-ux-expert"]
+    }
+  },
+
+  "progress_dashboard": {
+    "enabled": true,
+    "show_in_response": true,
+    "compact_mode": false
+  },
+
+  "skills": {
+    "auto_invoke": [],
+    "available": ["frontend-architect", "react-native-developer"],
+    "required_for_ui": ["frontend-architect"],
+    "required_for_performance": ["react-native-developer"]
+  },
+
+  "hooks": {
+    "post_edit": {
+      "enabled": true,
+      "fail_on_critical": false
+    },
+    "scan": {
+      "enabled": true,
+      "on_startup": true
+    },
+    "skill_cache": {
+      "enabled": true,
+      "directory": "${HOME}/.claude/skills-cache"
+    }
+  },
+
+  "commands": {
+    "check": {
+      "typescript": "npx tsc --noEmit",
+      "lint": "npx eslint . --ext .ts,.tsx",
+      "format": "npx prettier --check .",
+      "test": "npm test",
+      "build": "npm run build"
+    }
+  },
+
+  "mcp": {
+    "visual_validation": {
+      "enabled": true,
+      "tools": {
+        "puppeteer": {
+          "enabled": true,
+          "dev_server_url": "http://localhost:3000",
+          "screenshot_before_after": true
+        },
+        "figma": {
+          "enabled": false,
+          "channel": ""
+        }
+      },
+      "auto_screenshot": {
+        "on_ui_change": true,
+        "screens": []
+      }
+    }
+  },
+
+  "severity_levels": {
+    "error": ["hardcoded_strings", "hardcoded_colors", "type_any"],
+    "warning": ["inline_styles", "console_log"],
+    "info": ["todo_fixme"]
+  }
+}
