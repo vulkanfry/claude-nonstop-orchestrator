@@ -62,6 +62,35 @@ description: NONSTOP v2.1 - Unstoppable task executor with ULTRATHINK planning, 
 
 ## PHASE 0: PREPARATION
 
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  PHASE 0 DECISION TREE - FOLLOW THIS EXACTLY                     ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  Step 0.1: Check State                                           ║
+║     ├─ IF active session → RESUME (skip to current phase)        ║
+║     └─ ELSE → Continue to 0.2                                    ║
+║                                                                  ║
+║  Step 0.2: Detect Domain & Skills                                ║
+║     └─ ALWAYS execute, save to state                             ║
+║                                                                  ║
+║  Step 0.3: Check Skills                                          ║
+║     ├─ IF skill EXISTS → Invoke it                               ║
+║     └─ IF skill MISSING → GO TO 0.4a (CREATE IT!)                ║
+║                                                                  ║
+║  Step 0.4a: Create Skill (WebSearch)                             ║
+║     └─ MANDATORY if any skill is missing                         ║
+║                                                                  ║
+║  Step 0.4b: Search MCPs (WebSearch)                              ║
+║     ├─ IF no MCPs installed → MANDATORY search                   ║
+║     └─ IF MCPs exist but irrelevant → MANDATORY search           ║
+║                                                                  ║
+║  Step 0.5: Complete Preparation                                  ║
+║     └─ ALWAYS execute before Phase 1                             ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
 ### Step 0.1: STATE CHECK
 
 !!! MANDATORY - EXECUTE THESE COMMANDS FIRST !!!
@@ -110,31 +139,47 @@ bash .claude/lib/state-manager.sh get-preparation
 - DevOps → `devops-expert`
 - Database → `database-expert`
 
-### Step 0.3: AUTO-INVOKE RECOMMENDED SKILLS
+### Step 0.3: CHECK & INVOKE SKILLS
 
-!!! FOR EACH RECOMMENDED SKILL - INVOKE IT !!!
+!!! MANDATORY - CHECK EACH RECOMMENDED SKILL !!!
 
 ```bash
-# >>> EXECUTE NOW: For each skill in RECOMMENDED_SKILLS
-# Example: if "react-native-expert" was recommended:
-
-# Check if skill exists
-ls .claude/skills/domains/react-native-expert.md 2>/dev/null && echo "EXISTS"
-
-# Record that we're invoking it
-bash .claude/lib/state-manager.sh add-skill "react-native-expert"
+# >>> EXECUTE NOW: Check which skills exist
+for skill in $RECOMMENDED_SKILLS; do
+  if [ -f ".claude/skills/domains/${skill}.md" ]; then
+    echo "EXISTS: $skill"
+  else
+    echo "MISSING: $skill"
+  fi
+done
 ```
 
->>> THEN USE Skill TOOL TO INVOKE:
+**DECISION LOGIC:**
 ```
-Use Skill tool: skill: "react-native-expert"  (if exists)
+IF skill EXISTS:
+  → Invoke it with Skill tool
+  → bash .claude/lib/state-manager.sh add-skill "skill-name"
+
+IF skill MISSING:
+  → MUST GO TO Step 0.4a to CREATE IT
+  → DO NOT SKIP - create the skill first!
+
+IF NO skills recommended AND task needs domain expertise:
+  → Identify domain from task keywords
+  → GO TO Step 0.4a to CREATE appropriate skill
 ```
 
-**If skill doesn't exist but is needed → proceed to Step 0.4a**
+>>> FOR EXISTING SKILLS - INVOKE:
+```
+Use Skill tool: skill: "[skill-name]"
+bash .claude/lib/state-manager.sh add-skill "[skill-name]"
+```
 
-### Step 0.4a: CREATE EXPERT SKILL (if needed)
+### Step 0.4a: CREATE EXPERT SKILL
 
-!!! CREATE SKILL WHEN: recommended skill doesn't exist OR domain requires specialized knowledge !!!
+!!! MANDATORY WHEN: ANY recommended skill is MISSING !!!
+!!! MANDATORY WHEN: Task domain has NO matching skill !!!
+!!! DO NOT SKIP THIS STEP IF SKILLS ARE NEEDED !!!
 
 >>> STEP 1: RESEARCH VIA WEBSEARCH (PARALLEL - 4 searches)
 
@@ -197,37 +242,76 @@ bash .claude/lib/state-manager.sh add-skill "[domain]-expert"
 Use Skill tool: skill: "[domain]-expert"
 ```
 
-### Step 0.4b: DISCOVER MCPs (optional, for complex tasks)
+### Step 0.4b: DISCOVER & RECOMMEND MCPs
 
->>> STEP 1: SCAN LOCAL MCPs
+!!! MANDATORY WHEN: DETECTED_MCPS is empty OR no relevant MCPs for task domain !!!
+
+**DECISION LOGIC:**
+```
+IF DETECTED_MCPS is empty:
+  → MUST search for relevant MCPs online
+
+IF DETECTED_MCPS exists but NONE match task domain:
+  → MUST search for domain-specific MCPs
+
+IF relevant MCPs already installed:
+  → List them and their useful tools
+  → SKIP online search
+```
+
+>>> STEP 1: CHECK LOCAL MCPs
 
 ```bash
+# >>> EXECUTE NOW: Scan installed MCPs
 bash .claude/lib/mcp-scanner.sh json
+
+# Check if any are relevant to task domain
+# If empty or no match → proceed to online search
 ```
 
->>> STEP 2: SEARCH FOR RELEVANT MCPs (PARALLEL WebSearch)
+>>> STEP 2: SEARCH GITHUB FOR MCPs (PARALLEL WebSearch)
+
+!!! EXECUTE THESE 3 SEARCHES IN PARALLEL !!!
 
 ```
-WebSearch query 1: "MCP server [domain] site:github.com"
-WebSearch query 2: "model context protocol [domain] tools github"
-WebSearch query 3: "anthropic mcp [keywords]"
+WebSearch: "MCP server [domain] site:github.com"
+WebSearch: "model context protocol [task-keywords] tools"
+WebSearch: "anthropic MCP [domain] server"
 ```
 
->>> STEP 3: OUTPUT RECOMMENDATIONS
+>>> STEP 3: PARSE RESULTS & RECOMMEND
+
+For each relevant MCP found:
+1. Extract GitHub URL
+2. Check stars/activity
+3. List relevant tools/capabilities
+4. Generate install command
+
+>>> STEP 4: OUTPUT & SAVE
 
 ```markdown
 ## MCP DISCOVERY RESULTS
 
-### Already Installed:
-- [mcp-name] - [relevant capability]
+### Already Installed (relevant):
+- **[mcp-name]** - Tools: [tool1], [tool2]
 
-### Recommended to Install:
-1. **[mcp-name]** ([github-url])
-   Why: [reason relevant to task]
-   Install: `npx @anthropic/mcp-install [name]`
+### RECOMMENDED TO INSTALL:
+1. **[mcp-name]** ⭐ [stars]
+   URL: [github-url]
+   Why: [relevance to task]
+   Tools: [tool1], [tool2]
+   Install: `npx @michaellatman/mcp-get@latest install [name]`
 
-### Not Needed:
-- [mcp-name] - [why not relevant]
+2. **[mcp-name]** ⭐ [stars]
+   ...
+
+### Not Relevant:
+- [mcp-name] - [why not useful for this task]
+```
+
+```bash
+# >>> EXECUTE NOW: Save MCP recommendations to state
+bash .claude/lib/state-manager.sh update '.preparation.mcp_recommendations = ["mcp1", "mcp2"]'
 ```
 
 ### Step 0.5: PREPARATION COMPLETE
